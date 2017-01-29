@@ -8,13 +8,21 @@ python:
   - 3.6
 services:
   - mongodb
+
+addons:
+  apt:
+    sources:
+    - mongodb-3.0-precise
+    packages:
+    - mongodb-org-server
+
 before_script:
   - sleep 15
-  - mongo dstore_test --eval 'db.createUser({user: "test", pwd: "test123", roles: [{ role: "readWrite", db: "dstore_test" }]});'
+  - cd tests && python add_user.py && ..
 install:
   - pip install -q -r dev_requirements.txt
   - pip install coveralls
 script:
-  - nosetests -vs tests --with-coverage --cover-package=dstore
+  - nosetests -vs tests --with-coverage --cover-package=dstore_mongo
 after_success:
   - coveralls
