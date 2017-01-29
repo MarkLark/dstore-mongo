@@ -1,6 +1,7 @@
 from unittest import TestCase
 from pymongo import MongoClient
 from dstore import Model, var, mod
+from os import environ
 
 
 class Car( Model ):
@@ -15,8 +16,10 @@ class Car( Model ):
 
 class BaseTest( TestCase ):
     def setUp( self ):
-        self.client = MongoClient( "192.168.2.165" )
-        self.db     = self.client.test
+        if environ.get( "VM" ) is None: self.client = MongoClient( "localhost" )
+        else                          : self.client = MongoClient( "192.168.2.165" )
+
+        self.db = self.client.dstore_test
         self.db.authenticate( "test", "test123" )
 
     def tearDown( self ):
