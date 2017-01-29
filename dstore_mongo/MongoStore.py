@@ -20,6 +20,13 @@ class MongoStore( Store ):
         self.events.before_connect( self )
         con = MongoClient( self.get_config( "DSTORE_DB_HOST" ) )
         self.db_name = self.get_config( "DSTORE_DB_DB" )
+
+        db = con[ self.db_name ]
+        db.authenticate(
+            self.get_config( "DSTORE_DB_USER" ),
+            self.get_config( "DSTORE_DB_PASSWD" )
+        )
+        
         self.events.after_connect( self )
         return con
 
