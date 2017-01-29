@@ -1,4 +1,5 @@
 from dstore import Store
+from dstore.Error import InstanceNotFound
 from pymongo import MongoClient
 
 
@@ -26,7 +27,7 @@ class MongoStore( Store ):
             self.get_config( "DSTORE_DB_USER" ),
             self.get_config( "DSTORE_DB_PASSWD" )
         )
-        
+
         self.events.after_connect( self )
         return con
 
@@ -38,6 +39,10 @@ class MongoStore( Store ):
         db = self._get_db()
         return db[ model._namespace.replace( ".", "_" )]
 
+    def _num_rows( self, model ):
+        col = self._get_collection( model )
+        return col.count()
+
     def disconnect( self ):
         self.events.before_disconnect( self )
         self.con.close()
@@ -47,3 +52,50 @@ class MongoStore( Store ):
     def destroy( self, model ):
         col = self._get_collection( model )
         col.delete_many({})
+
+    def add( self, instance ):
+        col = self._get_collection( instance )
+        instance.id = self._num_rows( instance )
+        col.insert_one( instance.to_dict() )
+
+    def all( self, model ):
+        col = self._get_collection( model )
+        rtn = []
+        for row in col.find({}): rtn.append( model( **row ))
+        return rtn
+
+    def update( self, instance ):
+        col = self._get_collection( instance )
+        col.update_one(
+            { "id": instance.id },
+            { "$set": instance.to_dict() }
+        )
+
+    def get( self, model, row_id ):
+        col = self._get_collection( model )
+        row = col.find_one({ "id": row_id })
+
+        if row is None: raise InstanceNotFound( self, model( id = row_id ))
+        return model( **row )
+
+    def delete( self, instance ):
+        col = self._get_collection( instance )
+        col.delete_one({ "id": instance.id })
+
+    def filter( self, model, **kwargs ):
+        col = self._get_collection( model )
+
+        # Remove kwarg entries with a value of None
+        kargs = {}
+        for key, val in kwargs.items():
+            if val is not None: kargs[ key ] = val
+
+        rtn = []
+        for row in col.find( dict( kargs ) ): rtn.append( model( **row ))
+
+        num_rows = len( rtn )
+        if num_rows == 0:
+            kwargs["id"] = -1
+            raise InstanceNotFound( self, model( **kwargs ))
+
+        return rtn
