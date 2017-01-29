@@ -1,5 +1,16 @@
 from unittest import TestCase
 from pymongo import MongoClient
+from dstore import Model, var, mod
+
+
+class Car( Model ):
+    _namespace = "cars.make"
+    _vars = [
+        var.RowID,
+        var.String( "manufacturer", 32, mods = [ mod.NotNull() ] ),
+        var.String( "make", 32, mods = [ mod.NotNull() ] ),
+        var.Number( "year", mods = [ mod.NotNull(), mod.Min( 1950 ), mod.Max( 2017 ) ] ),
+    ]
 
 
 class BaseTest( TestCase ):
