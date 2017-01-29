@@ -53,6 +53,9 @@ class MongoStore( Store ):
         col = self._get_collection( model )
         col.delete_many({})
 
+    def empty( self, model ):
+        self.destroy( model )
+
     def add( self, instance ):
         col = self._get_collection( instance )
         instance.id = self._num_rows( instance )
