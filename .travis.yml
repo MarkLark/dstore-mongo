@@ -18,11 +18,11 @@ addons:
 
 before_script:
   - sleep 15
-  - cd tests && python add_user.py && ..
 install:
   - pip install -q -r dev_requirements.txt
   - pip install coveralls
 script:
+  - cd tests && python add_user.py && ..
   - nosetests -vs tests --with-coverage --cover-package=dstore_mongo
 after_success:
   - coveralls
