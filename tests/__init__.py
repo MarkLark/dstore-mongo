@@ -2,6 +2,7 @@ from unittest import TestCase
 from pymongo import MongoClient
 from dstore import Model, var, mod
 from os import environ
+from dstore_mongo import MongoStore
 
 
 class Car( Model ):
@@ -36,3 +37,32 @@ class BaseTest( TestCase ):
 
     def filter( self, **kwargs ):
         return self.db.Cars.find( dict( **kwargs ) )
+
+
+class StoreTest( TestCase ):
+    models      = [ Car ]
+    auto_init   = True
+    auto_create = True
+
+    def setUp( self ):
+        if self.auto_init:
+            self.store = MongoStore( self.models )
+            self.store.init_app()
+
+            if environ.get( "VM" ) is None: host = "localhost"
+            else                          : host = "192.168.2.165"
+
+            self.store.set_config(dict(
+                DSTORE_DB_HOST   = host,
+                DSTORE_DB_USER   = "test",
+                DSTORE_DB_PASSWD = "test123",
+                DSTORE_DB_DB     = "dstore_test"
+            ))
+
+            self.store.connect()
+
+    def tearDown( self ):
+        if self.auto_create: self.store.destroy_all()
+        if self.auto_init:
+            self.store.disconnect()
+            self.store.destroy_app()
