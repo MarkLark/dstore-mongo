@@ -23,3 +23,13 @@ class BaseTest( TestCase ):
         self.db.Cars.delete_many({})
         self.db.logout()
         self.client.close()
+
+    def add_one( self ):
+        self.db.Cars.insert_one( { "id": 1, "manufacturer": "Holden", "make": "Commodore", "year": 2006 } )
+
+    def add_many( self, num_rows ):
+        for i in range( num_rows ):
+            self.db.Cars.insert_one( { "id": i, "manufacturer": "Holden", "make": "Commodore", "year": 2006 + i } )
+
+    def filter( self, **kwargs ):
+        return self.db.Cars.find( dict( **kwargs ) )
