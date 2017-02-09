@@ -1,4 +1,4 @@
-from nose.tools import eq_, assert_raises
+from nose.tools import eq_
 from dstore.Error import InstanceNotFound
 from . import StoreTest, Car
 
@@ -49,8 +49,7 @@ class CRUD( StoreTest ):
     def test_get_none( self ):
         Car( manufacturer = "Holden", make = "Commodore", year = 2005 ).add()
 
-        with assert_raises( InstanceNotFound ):
-            Car.get( 3 )
+        self.assertRaises( InstanceNotFound, Car.get, 3 )
 
     def test_delete( self ):
         Car( manufacturer = "Holden", make = "Commodore", year = 2005 ).add()
@@ -89,5 +88,4 @@ class CRUD( StoreTest ):
         Car( manufacturer = "Holden", make = "Rodeo",     year = 2008 ).add()
         Car( manufacturer = "Holden", make = "Colorado",  year = 2009 ).add()
 
-        with assert_raises( InstanceNotFound ):
-            Car.filter( make = "Gummy" )
+        self.assertRaises( InstanceNotFound, Car.filter, make = "Gummy" )
